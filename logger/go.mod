@@ -1,6 +1,6 @@
 module github.com/LeoRBlume/go-libs/logger
 
-go 1.21
+go 1.26.1
 
 require (
 	github.com/google/uuid v1.6.0
