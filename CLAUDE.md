@@ -120,40 +120,24 @@ func TestUserService_Create(t *testing.T) {
 }
 ```
 
-### 10. Serviços recebem `*logger.Logger` por injeção de dependência
+### 10. Prefira funções globais — injete instância apenas quando necessário
 
-Nunca chame as funções globais (`logger.Info`, `logger.Error`, etc.) dentro de structs de serviço. Receba a instância como campo e use os métodos da struct.
-
-Use `logger.New(cfg)` para criar a instância no `main` e `logger.NewNop()` nos testes.
+O padrão recomendado é configurar o logger uma vez no `main` e usar as funções globais em qualquer lugar da aplicação. Não é necessário passar `*logger.Logger` para cada struct.
 
 ```go
-// ERRADO
-type UserService struct{}
+// main.go — configura uma vez
+logger.Setup(logger.Config{
+    ServiceName: "meu-servico",
+    Level:       logger.LevelInfo,
+})
 
+// qualquer serviço — usa diretamente, sem campo na struct
 func (s *UserService) Create(ctx context.Context) {
-    logger.Info(ctx, "UserService.Create", "criado") // global — dificulta testes
+    logger.Info(ctx, "UserService.Create", "criado")
 }
-
-// CORRETO
-type UserService struct {
-    log *logger.Logger
-}
-
-func NewUserService(log *logger.Logger) *UserService {
-    return &UserService{log: log}
-}
-
-func (s *UserService) Create(ctx context.Context) {
-    s.log.Info(ctx, "UserService.Create", "criado")
-}
-
-// No main
-log := logger.New(logger.Config{ServiceName: "meu-servico", Level: logger.LevelInfo})
-svc := NewUserService(log)
-
-// Nos testes
-svc := NewUserService(logger.NewNop())
 ```
+
+Use injeção de dependência (`logger.New`) apenas quando precisar de loggers com configurações diferentes por componente (ex: nível diferente por módulo). Nesse caso, injete `*logger.Logger` como campo da struct e use `logger.NewNop()` nos testes.
 
 ## O que NÃO fazer
 
