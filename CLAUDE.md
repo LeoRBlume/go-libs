@@ -124,6 +124,8 @@ func TestUserService_Create(t *testing.T) {
 
 Nunca chame as funções globais (`logger.Info`, `logger.Error`, etc.) dentro de structs de serviço. Receba a instância como campo e use os métodos da struct.
 
+Use `logger.New(cfg)` para criar a instância no `main` e `logger.NewNop()` nos testes.
+
 ```go
 // ERRADO
 type UserService struct{}
@@ -144,6 +146,13 @@ func NewUserService(log *logger.Logger) *UserService {
 func (s *UserService) Create(ctx context.Context) {
     s.log.Info(ctx, "UserService.Create", "criado")
 }
+
+// No main
+log := logger.New(logger.Config{ServiceName: "meu-servico", Level: logger.LevelInfo})
+svc := NewUserService(log)
+
+// Nos testes
+svc := NewUserService(logger.NewNop())
 ```
 
 ## O que NÃO fazer

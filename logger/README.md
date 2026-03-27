@@ -77,14 +77,23 @@ mux := http.NewServeMux()
 http.ListenAndServe(":8080", logger.TraceMiddleware(mux))
 ```
 
-## Logger de instância
+## Logger de instância (injeção de dependência)
 
-Para usar uma instância própria em vez do logger global:
+Use `logger.New()` para criar uma instância configurada e injetá-la nos serviços.
 
 ```go
-log := logger.NewNop() // descarta tudo — ideal para testes
+// No main
+log := logger.New(logger.Config{ServiceName: "meu-servico", Level: logger.LevelInfo})
+svc := NewUserService(log)
 
-log.Info(ctx, "src", "msg")
+// No serviço
+type UserService struct {
+    log *logger.Logger
+}
+
+func (s *UserService) Create(ctx context.Context) {
+    s.log.Info(ctx, "UserService.Create", "usuário criado")
+}
 ```
 
 ## Testes

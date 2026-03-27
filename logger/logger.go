@@ -26,6 +26,11 @@ func init() {
 	defaultLogger = newLogger(Config{ServiceName: "app", Level: LevelInfo}, os.Stdout)
 }
 
+// New returns a configured Logger instance for use with dependency injection.
+func New(cfg Config) *Logger {
+	return newLogger(cfg, os.Stdout)
+}
+
 // Setup initializes the global logger with the provided configuration.
 // Must be called at application startup before any log calls.
 func Setup(cfg Config) {
